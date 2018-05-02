@@ -12,13 +12,25 @@ const linkMap = {
     fs.writeFileSync('map.json', JSON.stringify(this.links), 'utf8')
   },
   getLink() {
-    const url = this.links.pending.shift()
+    const domainsAlreadyExplored = [ ...new Set(this.links.alreadyExplored.map(val => val.split('/')[0])) ]
+    for (key in this.links.pending) {
+      const url = this.links.pending[key]
+      const domain = url.split('/')[0]
+      if (!domainsAlreadyExplored.includes(domain)) {
+        this.links.pending.splice(key, 1)
+        this.links.alreadyExplored.push(url)
+        return 'https://' + url
+      }
+    }
+    // if no new domains, just send first link
+    const url = this.links.pending[0]
+    this.links.pending.splice(0, 1)
     this.links.alreadyExplored.push(url)
-    return url
+    return 'https://' + url
   },
   addLink(url) {
-    if (!(url in this.links.pending) && !(url in this.links.alreadyExplored)) {
-      this.links.pending.push(url)
+    if (!this.links.pending.includes(url) && !this.links.alreadyExplored.includes(url)) {
+      this.links.pending.push(url.replace('https://', ''))
     }
   }
 }
@@ -26,7 +38,7 @@ const linkMap = {
 if (!fs.existsSync('map.json')) {
   linkMap.links = {
     pending: [
-      'https://balbona.me'
+      'balbona.me'
     ],
     alreadyExplored: []
   }
@@ -59,7 +71,7 @@ function crawlNext() {
       sendTweet(url)
       browser.close()
     })
-    const links = await page.$$eval('a[href^="http"]', divs => divs.map(el => el.href))
+    const links = await page.$$eval('a[href^="https"]', divs => divs.map(el => el.href))
     links.forEach(link => {
       linkMap.addLink(link)
     })
@@ -69,9 +81,8 @@ function crawlNext() {
 
 function sendTweet(url) {
   TClient.post('media/upload', { media_data: b64content = fs.readFileSync('img.jpg', { encoding: 'base64' }) }, function (err, data, response) {
-    if (err){
-      console.log('ERROR:');
-      console.log(err);
+    if (err) {
+      console.error(err);
     }
     else {
       TClient.post('statuses/update', {
@@ -79,9 +90,8 @@ function sendTweet(url) {
         status: url
       },
         function(err, data, response) {
-          if (err){
-            console.log('ERROR:');
-            console.log(err);
+          if (err) {
+            console.error(err);
           }
         }
       );
