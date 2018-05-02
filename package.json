@@ -1,0 +1,24 @@
+{
+  "name": "websurferbot",
+  "version": "1.0.0",
+  "description": "Twitter bot that clicks random links on the internet and documents it's discoveries on twitter",
+  "main": "bot.js",
+  "dependencies": {
+    "puppeteer": "^1.3.0",
+    "twit": "^2.2.9"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NiciusB/WebSurferBot.git"
+  },
+  "author": "NiciusB",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NiciusB/WebSurferBot/issues"
+  },
+  "homepage": "https://github.com/NiciusB/WebSurferBot#readme"
+}
