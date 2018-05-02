@@ -12,19 +12,21 @@ const linkMap = {
     fs.writeFileSync('map.json', JSON.stringify(this.links), 'utf8')
   },
   getLink() {
+    // get list of unique already seen domains
     const domainsAlreadyExplored = [ ...new Set(this.links.alreadyExplored.map(val => val.split('/')[0])) ]
+    // try to use a never seen domain
     for (key in this.links.pending) {
-      const url = this.links.pending[key]
-      const domain = url.split('/')[0]
+      const domain = this.links.pending[key].split('/')[0]
       if (!domainsAlreadyExplored.includes(domain)) {
-        this.links.pending.splice(key, 1)
-        this.links.alreadyExplored.push(url)
-        return 'https://' + url
+        return this.sendLink(key)
       }
     }
     // if no new domains, just send first link
-    const url = this.links.pending[0]
-    this.links.pending.splice(0, 1)
+    return this.sendLink(0)
+  },
+  sendLink(key) {
+    const url = this.links.pending[key]
+    this.links.pending.splice(key, 1)
     this.links.alreadyExplored.push(url)
     return 'https://' + url
   },
@@ -46,9 +48,9 @@ if (!fs.existsSync('map.json')) {
   linkMap.links =  JSON.parse(fs.readFileSync('map.json', 'utf8'))
 }
 
-setTimeout(() => {
+setInterval(() => {
   crawlNext()
-}, 30 * 60 * 1000)
+}, 24 * 60 * 1000)
 crawlNext()
 
 function crawlNext() {
