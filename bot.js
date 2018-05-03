@@ -12,12 +12,20 @@ const linkMap = {
     fs.writeFileSync('map.json', JSON.stringify(this.links), 'utf8')
   },
   getLink() {
-    // get list of unique already seen domains
-    const domainsAlreadyExplored = [ ...new Set(this.links.alreadyExplored.map(val => val.split('/')[0])) ]
+    // get list of unique already seen domains and subdomains
+    const domainsAlreadyExplored = [ ...new Set(this.links.alreadyExplored.map(val => val.split('/')[0].split('.').slice(-2))) ]
+    const subdomainsAlreadyExplored = [ ...new Set(this.links.alreadyExplored.map(val => val.split('/')[0])) ]
     // try to use a never seen domain
     for (key in this.links.pending) {
       const domain = this.links.pending[key].split('/')[0]
       if (!domainsAlreadyExplored.includes(domain)) {
+        return this.sendLink(key)
+      }
+    }
+    // try to use a never seen subdomain
+    for (key in this.links.pending) {
+      const domain = this.links.pending[key].split('/')[0]
+      if (!subdomainsAlreadyExplored.includes(domain)) {
         return this.sendLink(key)
       }
     }
