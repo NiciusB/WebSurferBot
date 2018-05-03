@@ -32,7 +32,7 @@ const linkMap = {
   },
   addLink(url) {
     if (!this.links.pending.includes(url) && !this.links.alreadyExplored.includes(url)) {
-      this.links.pending.push(url.replace('https://', ''))
+      this.links.pending.unshift(url.replace('https://', ''))
     }
   }
 }
@@ -70,7 +70,7 @@ function crawlNext() {
       timeout: 30000
     }).then(() => {
       page.$$eval('a[href^="https"]', divs => divs.map(el => el.href)).then((links) => {
-        links.forEach(link => {
+        links.reverse().forEach(link => {
           linkMap.addLink(link)
         })
         linkMap.save()
