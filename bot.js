@@ -12,20 +12,21 @@ const linkMap = {
     fs.writeFileSync('map.json', JSON.stringify(this.links), 'utf8')
   },
   getLink() {
-    // get list of unique already seen domains and subdomains
-    const domainsAlreadyExplored = [ ...new Set(this.links.alreadyExplored.map(val => val.split('/')[0].split('.').slice(-2))) ]
-    const subdomainsAlreadyExplored = [ ...new Set(this.links.alreadyExplored.map(val => val.split('/')[0])) ]
+    // get list of unique already seen domains
+    const domainsAlreadyExplored = [ ...new Set(this.links.alreadyExplored.map(val => val.split('/')[0].split('.').slice(-2).join('.'))) ]
     // try to use a never seen domain
     for (key in this.links.pending) {
-      const domain = this.links.pending[key].split('/')[0]
+      const domain = this.links.pending[key].split('/')[0].split('.').slice(-2).join('.')
       if (!domainsAlreadyExplored.includes(domain)) {
         return this.sendLink(key)
       }
     }
+    // get list of unique already seen subdomains
+    const subdomainsAlreadyExplored = [ ...new Set(this.links.alreadyExplored.map(val => val.split('/')[0])) ]
     // try to use a never seen subdomain
     for (key in this.links.pending) {
-      const domain = this.links.pending[key].split('/')[0]
-      if (!subdomainsAlreadyExplored.includes(domain)) {
+      const subdomain = this.links.pending[key].split('/')[0]
+      if (!subdomainsAlreadyExplored.includes(subdomain)) {
         return this.sendLink(key)
       }
     }
