@@ -65,19 +65,23 @@ function crawlNext() {
       deviceScaleFactor: 2
     })
     const url = linkMap.getLink()
-    await page.goto(url, {
+    page.goto(url, {
       waitUntil: 'networkidle0',
-      timeout: 20000
+      timeout: 30000
+    }).then(() => {
+      page.$$eval('a[href^="https"]', divs => divs.map(el => el.href)).then((links) => {
+        links.forEach(link => {
+          linkMap.addLink(link)
+        })
+        linkMap.save()
+      })
+      page.screenshot({path: 'img.jpg'}).then(() => {
+        sendTweet(url)
+        browser.close()
+      })
+    }).catch(() => {
+      crawlNext() // try next one
     })
-    page.screenshot({path: 'img.jpg'}).then(() => {
-      sendTweet(url)
-      browser.close()
-    })
-    const links = await page.$$eval('a[href^="https"]', divs => divs.map(el => el.href))
-    links.forEach(link => {
-      linkMap.addLink(link)
-    })
-    linkMap.save()
   })();
 }
 
